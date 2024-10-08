@@ -21,18 +21,25 @@ function saveReposToLocalStorage(repos) {
 function loadUserList() {
   const repos = getReposFromLocalStorage();
   userListContainer.innerHTML = ""; // Clear existing user list
-  for (const [user, repo] of Object.entries(repos)) {
-    const userItem = document.createElement("div");
-    userItem.classList.add("user-item");
-    userItem.innerHTML = `${user}/${repo} <span class="remove" onclick="removeRepo('${user}')">❌</span>`;
-    userListContainer.appendChild(userItem);
+  for (const [user, repoList] of Object.entries(repos)) {
+    repoList.forEach(repo => {
+      const userItem = document.createElement("div");
+      userItem.classList.add("user-item");
+      userItem.innerHTML = `${user}/${repo} <span class="remove" onclick="removeRepo('${user}', '${repo}')">❌</span>`;
+      userListContainer.appendChild(userItem);
+    });
   }
 }
 
 // Remove a user/repo from localStorage
-function removeRepo(user) {
+function removeRepo(user, repo) {
   const repos = getReposFromLocalStorage();
-  delete repos[user];
+  repos[user] = repos[user].filter(r => r !== repo);
+
+  if (repos[user].length === 0) {
+    delete repos[user];
+  }
+
   saveReposToLocalStorage(repos);
   loadUserList();
   loadWorkflowRuns(); // Reload workflow runs for the updated repo list
@@ -66,8 +73,13 @@ saveBtn.onclick = function () {
       const repository = match[2];
 
       const repos = getReposFromLocalStorage();
-      repos[username] = repository; // Add or update repo
-      saveReposToLocalStorage(repos);
+      repos[username] = repos[username] || [];
+      if (!repos[username].includes(repository)) {
+        repos[username].push(repository); // Add repo to the user's repo list
+        saveReposToLocalStorage(repos);
+      } else {
+        alert("Repository already exists for this user.");
+      }
 
       repoUrlInput.value = "";
       loadUserList();
@@ -128,17 +140,19 @@ async function loadWorkflowRuns() {
   commitsContainer.innerHTML = ""; // Clear current workflows
   const repos = getReposFromLocalStorage();
 
-  for (const [repoOwner, repoName] of Object.entries(repos)) {
-    const workflow = await fetchLatestWorkflowRun(repoOwner, repoName);
+  for (const [repoOwner, repoList] of Object.entries(repos)) {
+    for (const repoName of repoList) {
+      const workflow = await fetchLatestWorkflowRun(repoOwner, repoName);
 
-    if (workflow) {
-      const workflowElement = createWorkflowRunElement(workflow);
-      commitsContainer.appendChild(workflowElement);
-    } else {
-      const workflowElement = document.createElement("div");
-      workflowElement.classList.add("commit");
-      workflowElement.innerHTML = `<p>No recent workflow runs found for ${repoOwner}/${repoName}</p>`;
-      commitsContainer.appendChild(workflowElement);
+      if (workflow) {
+        const workflowElement = createWorkflowRunElement(workflow);
+        commitsContainer.appendChild(workflowElement);
+      } else {
+        const workflowElement = document.createElement("div");
+        workflowElement.classList.add("commit");
+        workflowElement.innerHTML = `<p>No recent workflow runs found for ${repoOwner}/${repoName}</p>`;
+        commitsContainer.appendChild(workflowElement);
+      }
     }
   }
 }
