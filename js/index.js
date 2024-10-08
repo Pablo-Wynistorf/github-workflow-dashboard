@@ -160,3 +160,5 @@ async function loadWorkflowRuns() {
 // Initialize the app by loading user list and workflows
 loadUserList();
 loadWorkflowRuns();
+
+setInterval(loadWorkflowRuns, 5000);
