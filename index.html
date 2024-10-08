@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Github Workflow Dashboard</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Github Workflow Status</h1>
+      <button id="settingsBtn">Settings</button>
+      <div class="user-list" id="userList">
+        <!-- User list will be dynamically injected here -->
+      </div>
+      <br />
+      <div id="commits">
+        <!-- Commit information will be dynamically injected here -->
+      </div>
+      <footer>Github Workflow | Powered by GitHub Pages</footer>
+    </div>
+
+    <!-- Modal -->
+    <div id="myModal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Add GitHub Repo</h2>
+        <input
+          type="text"
+          id="repoUrl"
+          placeholder="Paste GitHub Repo URL (e.g., https://github.com/user/repo)"
+        />
+        <button id="saveBtn">Save</button>
+      </div>
+    </div>
+
+    <script src="js/index.js"></script>
+  </body>
+</html>
