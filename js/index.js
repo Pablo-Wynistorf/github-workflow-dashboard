@@ -20,7 +20,7 @@ function saveReposToLocalStorage(repos) {
 // Load users and repositories
 function loadUserList() {
   const repos = getReposFromLocalStorage();
-  userListContainer.innerHTML = ""; // Clear existing user list
+  userListContainer.innerHTML = "";
 
   for (const [user, repoList] of Object.entries(repos)) {
     repoList.forEach(repo => {
@@ -43,7 +43,7 @@ function removeRepo(user, repo) {
 
   saveReposToLocalStorage(repos);
   loadUserList();
-  loadWorkflowRuns(); // Reload workflow runs for the updated repo list
+  loadWorkflowRuns();
 }
 
 // Open modal
@@ -76,7 +76,7 @@ saveBtn.onclick = function () {
       const repos = getReposFromLocalStorage();
       repos[username] = repos[username] || [];
       if (!repos[username].includes(repository)) {
-        repos[username].push(repository); // Add repo to the user's repo list
+        repos[username].push(repository);
         saveReposToLocalStorage(repos);
       } else {
         alert("Repository already exists for this user.");
