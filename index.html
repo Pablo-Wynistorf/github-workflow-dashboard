@@ -4,34 +4,63 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Github Workflow Dashboard</title>
-    <link rel="stylesheet" href="css/style.css" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
     <link rel="icon" href="assets/favicon.ico" type="image/x-icon" />
   </head>
-  <body>
-    <div class="container">
-      <h1>Github Workflow Status</h1>
-      <button id="settingsBtn">Settings</button>
-      <div class="user-list" id="userList">
-        <!-- User list will be dynamically injected here -->
-      </div>
-      <br />
-      <div id="commits">
-        <!-- Commit information will be dynamically injected here -->
-      </div>
-      <footer>Github Workflow | Powered by GitHub Pages</footer>
+  <body class="bg-gray-900 text-white font-sans">
+    <div class="container mx-auto p-6">
+      <header class="flex justify-between items-center mb-8">
+        <h1 class="text-4xl font-bold text-gray-100">Github Workflow Status</h1>
+        <button
+          id="settingsBtn"
+          class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-md transition"
+        >
+          Settings
+        </button>
+      </header>
+
+      <section class="mb-8">
+        <h2 class="text-2xl font-semibold mb-4">Repositories</h2>
+        <div id="userList" class="bg-gray-800 p-4 rounded-lg shadow-md">
+          <!-- User list will be dynamically injected here -->
+        </div>
+      </section>
+
+      <section class="mb-8">
+        <h2 class="text-2xl font-semibold mb-4">Workflow Runs</h2>
+        <div id="commits" class="space-y-4">
+          <!-- Commit information will be dynamically injected here -->
+        </div>
+      </section>
+
+      <footer class="mt-12 text-gray-500">
+        Github Workflow | Powered by GitHub Pages
+      </footer>
     </div>
 
     <!-- Modal -->
-    <div id="myModal" class="modal">
-      <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2>Add GitHub Repo</h2>
+    <div
+      id="myModal"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden"
+    >
+      <div class="bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-md">
+        <span class="close text-gray-400 cursor-pointer absolute top-4 right-4 text-xl">&times;</span>
+        <h2 class="text-2xl font-semibold text-gray-100 mb-4">Add GitHub Repo</h2>
         <input
           type="text"
           id="repoUrl"
           placeholder="Paste GitHub Repo URL (e.g., https://github.com/user/repo)"
+          class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-white mb-4"
         />
-        <button id="saveBtn">Save</button>
+        <button
+          id="saveBtn"
+          class="bg-green-600 hover:bg-green-500 w-full p-2 text-white rounded-md transition"
+        >
+          Save
+        </button>
       </div>
     </div>
 

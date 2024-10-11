@@ -21,11 +21,12 @@ function saveReposToLocalStorage(repos) {
 function loadUserList() {
   const repos = getReposFromLocalStorage();
   userListContainer.innerHTML = ""; // Clear existing user list
+
   for (const [user, repoList] of Object.entries(repos)) {
     repoList.forEach(repo => {
       const userItem = document.createElement("div");
-      userItem.classList.add("user-item");
-      userItem.innerHTML = `${user}/${repo} <span class="remove" onclick="removeRepo('${user}', '${repo}')">❌</span>`;
+      userItem.classList.add("user-item", "bg-gray-700", "p-3", "rounded-md", "flex", "justify-between", "items-center", "mb-2", "shadow-md", "text-gray-100");
+      userItem.innerHTML = `${user}/${repo} <span class="remove text-red-500 cursor-pointer" onclick="removeRepo('${user}', '${repo}')">❌</span>`;
       userListContainer.appendChild(userItem);
     });
   }
@@ -47,18 +48,18 @@ function removeRepo(user, repo) {
 
 // Open modal
 settingsBtn.onclick = function () {
-  modal.style.display = "block";
+  modal.classList.remove("hidden");
 };
 
 // Close modal
 span.onclick = function () {
-  modal.style.display = "none";
+  modal.classList.add("hidden");
 };
 
 // Close modal when clicking outside of it
 window.onclick = function (event) {
   if (event.target === modal) {
-    modal.style.display = "none";
+    modal.classList.add("hidden");
   }
 };
 
@@ -84,7 +85,7 @@ saveBtn.onclick = function () {
       repoUrlInput.value = "";
       loadUserList();
       loadWorkflowRuns(); // Reload workflow runs for the new repo
-      modal.style.display = "none";
+      modal.classList.add("hidden");
     } else {
       alert("Invalid GitHub URL format.");
     }
@@ -104,30 +105,48 @@ async function fetchLatestWorkflowRun(repoOwner, repoName) {
 }
 
 // Function to create HTML for a workflow run
-function createWorkflowRunElement(workflow) {
+function createWorkflowRunElement(workflow, repoOwner, repoName) {
   const workflowElement = document.createElement("div");
-  workflowElement.classList.add("commit");
+  workflowElement.classList.add("commit", "bg-gray-800", "p-4", "rounded-lg", "shadow-lg", "text-gray-100", "mb-4");
 
   const workflowTitle = document.createElement("h2");
-  workflowTitle.innerText = `Workflow: ${workflow.name}`;
+  workflowTitle.classList.add("text-lg", "font-semibold", "mb-2");
+
+  // Create an anchor element (link)
+  const workflowLink = document.createElement("a");
+  workflowLink.href = workflow.html_url;
+  workflowLink.target = "_blank";
+  workflowLink.innerText = `${repoOwner}/${repoName}`; // Display user/repo name as title
+  workflowLink.classList.add("text-blue-500", "hover:underline");
+
+  // Append the link to the workflow title
+  workflowTitle.appendChild(workflowLink);
   workflowElement.appendChild(workflowTitle);
 
-  const workflowDesc = document.createElement("p");
-  workflowDesc.innerText = `Status: ${workflow.status}, Conclusion: ${workflow.conclusion}`;
-  workflowElement.appendChild(workflowDesc);
+  // Display the commit message as h2
+  const commitMessage = document.createElement("h2");
+  commitMessage.innerText = "Commit: " + workflow.display_title;
+  commitMessage.classList.add("text-gray-300", "mb-2");
+  workflowElement.appendChild(commitMessage);
 
+  const workflowStartTime = document.createElement("p");
+  workflowStartTime.innerText = "Start Time: " + workflow.run_started_at;
+  workflowStartTime.classList.add("text-gray-400", "text-sm");
+  workflowElement.appendChild(workflowStartTime);
+
+  // Status: Pending, Success, or Failed
   const workflowStatus = document.createElement("span");
-  workflowStatus.classList.add("status");
+  workflowStatus.classList.add("status", "text-sm", "font-semibold", "px-3", "py-1", "rounded-full");
 
-  if (workflow.conclusion === "success") {
-    workflowStatus.classList.add("success");
-    workflowStatus.innerText = "Success";
-  } else if (workflow.conclusion === "failure") {
-    workflowStatus.classList.add("failure");
-    workflowStatus.innerText = "Failed";
-  } else {
+  if (workflow.status === "in_progress" || workflow.status === "queued") {
+    workflowStatus.classList.add("bg-yellow-500", "text-yellow-900");
     workflowStatus.innerText = "Pending";
-    workflowStatus.classList.add("pending");
+  } else if (workflow.conclusion === "success") {
+    workflowStatus.classList.add("bg-green-500", "text-green-900");
+    workflowStatus.innerText = "Success";
+  } else {
+    workflowStatus.classList.add("bg-red-500", "text-red-900");
+    workflowStatus.innerText = "Failed";
   }
 
   workflowElement.appendChild(workflowStatus);
@@ -145,12 +164,12 @@ async function loadWorkflowRuns() {
       const workflow = await fetchLatestWorkflowRun(repoOwner, repoName);
 
       if (workflow) {
-        const workflowElement = createWorkflowRunElement(workflow);
+        const workflowElement = createWorkflowRunElement(workflow, repoOwner, repoName);
         commitsContainer.appendChild(workflowElement);
       } else {
         const workflowElement = document.createElement("div");
-        workflowElement.classList.add("commit");
-        workflowElement.innerHTML = `<p>No recent workflow runs found for ${repoOwner}/${repoName}</p>`;
+        workflowElement.classList.add("commit", "bg-gray-800", "p-4", "rounded-lg", "shadow-lg", "text-gray-100", "mb-4");
+        workflowElement.innerHTML = `<p class="text-gray-400">No recent workflow runs found for ${repoOwner}/${repoName}</p>`;
         commitsContainer.appendChild(workflowElement);
       }
     }
@@ -161,4 +180,5 @@ async function loadWorkflowRuns() {
 loadUserList();
 loadWorkflowRuns();
 
+// Update workflows every 5 seconds
 setInterval(loadWorkflowRuns, 5000);
