@@ -135,24 +135,28 @@ function createWorkflowRunElement(workflow, repoOwner, repoName) {
   workflowElement.appendChild(workflowStartTime);
 
   // Status: Pending, Success, or Failed
-  const workflowStatus = document.createElement("span");
-  workflowStatus.classList.add("status", "text-sm", "font-semibold", "px-3", "py-1", "rounded-full");
+  const workflowStatus = document.createElement("p");
+  workflowStatus.classList.add("status", "text-sm", "font-semibold", "px-3", "py-1", "rounded-full", "mt-3", "inline-block");
 
   if (workflow.status === "in_progress" || workflow.status === "queued") {
     workflowStatus.classList.add("bg-yellow-500", "text-yellow-900");
     workflowStatus.innerText = "Pending";
-  } else if (workflow.conclusion === "success") {
-    workflowStatus.classList.add("bg-green-500", "text-green-900");
-    workflowStatus.innerText = "Success";
-  } else {
-    workflowStatus.classList.add("bg-red-500", "text-red-900");
-    workflowStatus.innerText = "Failed";
+  } else if (workflow.status === "completed") {
+    if (workflow.conclusion === "success") {
+      workflowStatus.classList.add("bg-green-500", "text-green-900");
+      workflowStatus.innerText = "Success";
+
+    } else {
+      workflowStatus.classList.add("bg-red-500", "text-red-900");
+      workflowStatus.innerText = "Failed";
+    }
   }
 
   workflowElement.appendChild(workflowStatus);
 
   return workflowElement;
 }
+
 
 // Load and display the latest workflow run
 async function loadWorkflowRuns() {
