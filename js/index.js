@@ -116,7 +116,7 @@ function createWorkflowRunElement(workflow, repoOwner, repoName) {
   const workflowLink = document.createElement("a");
   workflowLink.href = workflow.html_url;
   workflowLink.target = "_blank";
-  workflowLink.innerText = `${repoOwner}/${repoName}`; // Display user/repo name as title
+  workflowLink.innerText = `${repoOwner}/${repoName}`;
   workflowLink.classList.add("text-blue-500", "hover:underline");
 
   // Append the link to the workflow title
@@ -156,7 +156,7 @@ function createWorkflowRunElement(workflow, repoOwner, repoName) {
 
 // Load and display the latest workflow run
 async function loadWorkflowRuns() {
-  commitsContainer.innerHTML = ""; // Clear current workflows
+  commitsContainer.innerHTML = "";
   const repos = getReposFromLocalStorage();
 
   for (const [repoOwner, repoList] of Object.entries(repos)) {
@@ -176,9 +176,7 @@ async function loadWorkflowRuns() {
   }
 }
 
-// Initialize the app by loading user list and workflows
 loadUserList();
 loadWorkflowRuns();
 
-// Update workflows every 5 seconds
 setInterval(loadWorkflowRuns, 5000);
