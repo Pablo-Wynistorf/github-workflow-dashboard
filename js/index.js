@@ -6,6 +6,9 @@ const span = document.getElementsByClassName("close")[0];
 const saveBtn = document.getElementById("saveBtn");
 const repoUrlInput = document.getElementById("repoUrl");
 
+// Store references to workflow elements keyed by repo name
+const workflowElements = {};
+
 // Fetch repositories from localStorage
 function getReposFromLocalStorage() {
   const repos = localStorage.getItem("github_repos");
@@ -113,12 +116,11 @@ async function fetchLatestWorkflowRun(repoOwner, repoName) {
   return workflows.workflow_runs.length > 0 ? workflows.workflow_runs[0] : null;
 }
 
-
-
 // Function to create HTML for a workflow run
 function createWorkflowRunElement(workflow, repoOwner, repoName) {
   const workflowElement = document.createElement("div");
   workflowElement.classList.add("commit", "bg-gray-800", "p-4", "rounded-lg", "shadow-lg", "text-gray-100", "mb-4");
+  workflowElement.dataset.repoKey = `${repoOwner}/${repoName}`;
 
   const workflowTitle = document.createElement("h2");
   workflowTitle.classList.add("text-lg", "font-semibold", "mb-2");
@@ -133,13 +135,13 @@ function createWorkflowRunElement(workflow, repoOwner, repoName) {
   workflowElement.appendChild(workflowTitle);
 
   const commitMessage = document.createElement("h2");
+  commitMessage.classList.add("commit-message", "text-gray-300", "mb-2");
   commitMessage.innerText = "Commit: " + workflow.display_title;
-  commitMessage.classList.add("text-gray-300", "mb-2");
   workflowElement.appendChild(commitMessage);
 
   const workflowStartTime = document.createElement("p");
+  workflowStartTime.classList.add("start-time", "text-gray-400", "text-sm");
   workflowStartTime.innerText = "Start Time: " + workflow.run_started_at;
-  workflowStartTime.classList.add("text-gray-400", "text-sm");
   workflowElement.appendChild(workflowStartTime);
 
   const workflowStatus = document.createElement("p");
@@ -155,7 +157,6 @@ function createWorkflowRunElement(workflow, repoOwner, repoName) {
     if (workflow.conclusion === "success") {
       workflowStatus.classList.add("bg-green-500", "text-green-900");
       workflowStatus.innerText = "Success";
-
     } else {
       workflowStatus.classList.add("bg-red-500", "text-red-900");
       workflowStatus.innerText = "Failed";
@@ -167,24 +168,59 @@ function createWorkflowRunElement(workflow, repoOwner, repoName) {
   return workflowElement;
 }
 
+// Update an existing workflow element
+function updateWorkflowElement(existingElement, workflow) {
+  const commitMessage = existingElement.querySelector(".commit-message");
+  const workflowStartTime = existingElement.querySelector(".start-time");
+  const workflowStatus = existingElement.querySelector(".status");
 
-// Load and display the latest workflow run
+  commitMessage.innerText = "Commit: " + workflow.display_title;
+  workflowStartTime.innerText = "Start Time: " + workflow.run_started_at;
+
+  // Clear status classes and update based on workflow status
+  workflowStatus.className = "status text-sm font-semibold px-3 py-1 rounded-full mt-3 inline-block"; 
+  if (workflow.status === "queued") {
+    workflowStatus.classList.add("bg-yellow-500", "text-yellow-900");
+    workflowStatus.innerText = "Pending";
+  } else if (workflow.status === "in_progress") {
+    workflowStatus.classList.add("bg-blue-500", "text-blue-900");
+    workflowStatus.innerText = "Running";
+  } else if (workflow.status === "completed") {
+    if (workflow.conclusion === "success") {
+      workflowStatus.classList.add("bg-green-500", "text-green-900");
+      workflowStatus.innerText = "Success";
+    } else {
+      workflowStatus.classList.add("bg-red-500", "text-red-900");
+      workflowStatus.innerText = "Failed";
+    }
+  }
+}
+
+// Load and display the latest workflow run with smooth transitions
 async function loadWorkflowRuns() {
-  commitsContainer.innerHTML = "";
   const repos = getReposFromLocalStorage();
 
   for (const [repoOwner, repoList] of Object.entries(repos)) {
     for (const repoName of repoList) {
       const workflow = await fetchLatestWorkflowRun(repoOwner, repoName);
+      const repoKey = `${repoOwner}/${repoName}`;
 
       if (workflow) {
-        const workflowElement = createWorkflowRunElement(workflow, repoOwner, repoName);
-        commitsContainer.appendChild(workflowElement);
+        if (workflowElements[repoKey]) {
+          updateWorkflowElement(workflowElements[repoKey], workflow);
+        } else {
+          const workflowElement = createWorkflowRunElement(workflow, repoOwner, repoName);
+          commitsContainer.appendChild(workflowElement);
+          workflowElements[repoKey] = workflowElement;
+        }
       } else {
-        const workflowElement = document.createElement("div");
-        workflowElement.classList.add("commit", "bg-gray-800", "p-4", "rounded-lg", "shadow-lg", "text-gray-100", "mb-4");
-        workflowElement.innerHTML = `<p class="text-gray-400">No recent workflow runs found for ${repoOwner}/${repoName}</p>`;
-        commitsContainer.appendChild(workflowElement);
+        if (!workflowElements[repoKey]) {
+          const workflowElement = document.createElement("div");
+          workflowElement.classList.add("commit", "bg-gray-800", "p-4", "rounded-lg", "shadow-lg", "text-gray-100", "mb-4");
+          workflowElement.innerHTML = `<p class="text-gray-400">No recent workflow runs found for ${repoOwner}/${repoName}</p>`;
+          commitsContainer.appendChild(workflowElement);
+          workflowElements[repoKey] = workflowElement;
+        }
       }
     }
   }
@@ -192,5 +228,4 @@ async function loadWorkflowRuns() {
 
 loadUserList();
 loadWorkflowRuns();
-
 setInterval(loadWorkflowRuns, 5000);
