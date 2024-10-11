@@ -92,13 +92,17 @@ saveBtn.onclick = function () {
   }
 };
 
-
 // Fetch latest workflow run for the selected repo
 async function fetchLatestWorkflowRun(repoOwner, repoName) {
   const workflowUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/actions/runs?per_page=1&timestamp=${Date.now()}`; 
   const response = await fetch(workflowUrl, {
     method: 'GET',
   });
+
+  if (response.status === 403) {
+    alert("GitHub API Rate Limit reached. Please change your IP address or wait for the rate limit to reset.");
+    return null;
+  }
 
   if (!response.ok) {
     console.error("Failed to fetch workflow runs:", response.statusText);
@@ -108,6 +112,7 @@ async function fetchLatestWorkflowRun(repoOwner, repoName) {
   const workflows = await response.json();
   return workflows.workflow_runs.length > 0 ? workflows.workflow_runs[0] : null;
 }
+
 
 
 // Function to create HTML for a workflow run
