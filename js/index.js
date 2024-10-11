@@ -94,15 +94,20 @@ saveBtn.onclick = function () {
 
 // Fetch latest workflow run for the selected repo
 async function fetchLatestWorkflowRun(repoOwner, repoName) {
-  const workflowUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/actions/runs?per_page=1`;
-  const response = await fetch(workflowUrl);
+  const workflowUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/actions/runs?per_page=1&timestamp=${Date.now()}`; 
+  const response = await fetch(workflowUrl, {
+    method: 'GET',
+  });
+
   if (!response.ok) {
     console.error("Failed to fetch workflow runs:", response.statusText);
     return null;
   }
+
   const workflows = await response.json();
   return workflows.workflow_runs.length > 0 ? workflows.workflow_runs[0] : null;
 }
+
 
 // Function to create HTML for a workflow run
 function createWorkflowRunElement(workflow, repoOwner, repoName) {
