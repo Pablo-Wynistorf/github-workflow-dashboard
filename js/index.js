@@ -84,7 +84,7 @@ saveBtn.onclick = function () {
 
       repoUrlInput.value = "";
       loadUserList();
-      loadWorkflowRuns(); // Reload workflow runs for the new repo
+      loadWorkflowRuns();
       modal.classList.add("hidden");
     } else {
       alert("Invalid GitHub URL format.");
@@ -112,18 +112,15 @@ function createWorkflowRunElement(workflow, repoOwner, repoName) {
   const workflowTitle = document.createElement("h2");
   workflowTitle.classList.add("text-lg", "font-semibold", "mb-2");
 
-  // Create an anchor element (link)
   const workflowLink = document.createElement("a");
   workflowLink.href = workflow.html_url;
   workflowLink.target = "_blank";
   workflowLink.innerText = `${repoOwner}/${repoName}`;
   workflowLink.classList.add("text-blue-500", "hover:underline");
 
-  // Append the link to the workflow title
   workflowTitle.appendChild(workflowLink);
   workflowElement.appendChild(workflowTitle);
 
-  // Display the commit message as h2
   const commitMessage = document.createElement("h2");
   commitMessage.innerText = "Commit: " + workflow.display_title;
   commitMessage.classList.add("text-gray-300", "mb-2");
@@ -134,7 +131,6 @@ function createWorkflowRunElement(workflow, repoOwner, repoName) {
   workflowStartTime.classList.add("text-gray-400", "text-sm");
   workflowElement.appendChild(workflowStartTime);
 
-  // Status: Pending, Success, or Failed
   const workflowStatus = document.createElement("p");
   workflowStatus.classList.add("status", "text-sm", "font-semibold", "px-3", "py-1", "rounded-full", "mt-3", "inline-block");
 
