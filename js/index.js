@@ -139,9 +139,12 @@ function createWorkflowRunElement(workflow, repoOwner, repoName) {
   const workflowStatus = document.createElement("p");
   workflowStatus.classList.add("status", "text-sm", "font-semibold", "px-3", "py-1", "rounded-full", "mt-3", "inline-block");
 
-  if (workflow.status === "in_progress" || workflow.status === "queued") {
+  if (workflow.status === "queued") {
     workflowStatus.classList.add("bg-yellow-500", "text-yellow-900");
     workflowStatus.innerText = "Pending";
+  } else if (workflow.status === "in_progress") {
+    workflowStatus.classList.add("bg-blue-500", "text-blue-900");
+    workflowStatus.innerText = "Running";
   } else if (workflow.status === "completed") {
     if (workflow.conclusion === "success") {
       workflowStatus.classList.add("bg-green-500", "text-green-900");
